@@ -31,6 +31,9 @@ exports.crearUsuario = async (req, res) => {
         const salt = await bcryptjs.genSalt(10);
         usuario.password = await bcryptjs.hash(password, salt);
 
+        // Guardar usuario
+        await usuario.save();
+
         // Crear y firmar el JWT
         const payload = {
             usuario:{
@@ -48,9 +51,6 @@ exports.crearUsuario = async (req, res) => {
             res.json({ token });
 
         });
-
-        // Guardar usuario
-        await usuario.save();
 
     } catch (error) {
         console.log(error);
