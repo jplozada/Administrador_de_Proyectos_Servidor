@@ -3,7 +3,7 @@ const {validationResult} = require('express-validator');
 
 exports.crearProyecto = async (req, res) => {
 
-    // Revisae si hay errores
+    // Revisar si hay errores
     const errores = validationResult(req);
 
     if(!errores.isEmpty()){
