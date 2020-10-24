@@ -34,5 +34,68 @@ exports.crearTarea = async(req, res) => {
         console.log(error);
         res.status(500).send('Hubo un error');
     }
+}
 
+// Obtiene las tareas por proyecto
+exports.obtenerTareas = async (req, res) => {
+    try {
+        // Extraer el proyecto y comprobar si existe
+        const { proyecto } = req.body;
+
+        const existeProyecto = await Proyecto.findById(proyecto);
+        if(!existeProyecto){
+            return res.status(404).json({msg: 'Proyecto no encontrado'})
+        }
+
+        // Revisar si el proyecto actual pertenece al usuario autenticado
+        if(existeProyecto.creador.toString() !== req.usuario.id){
+            return res.status(401).json({msg: 'No Autorizado'});
+        }
+
+        // Obtener las tareas por proyecto
+        const tareas = await Tarea.find({ proyecto });
+        res.json({ tareas });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Hubo un error');
+    }
+}
+
+// Actulizar una tarea
+exports.actualizarTarea = async(req, res) => {
+    try {
+        // Extraer el proyecto y comprobar si existe
+        const { proyecto, nombre, estado } = req.body;
+        
+        // Revisar si la tarea existe o no
+        let tarea = await Tarea.findById(req.params.id);
+
+        if(!tarea){
+            return res.status(404).json({msg: 'No existe esa tarea'});
+        }
+        
+        // Extraer proyecto
+        const existeProyecto = await Proyecto.findById(proyecto);
+
+        // Revisar si el proyecto actual pertenece al usuario autenticado
+        if(existeProyecto.creador.toString() !== req.usuario.id){
+            return res.status(401).json({msg: 'No Autorizado'});
+        }
+
+        // Crear un opbjeto con la nueva informacion
+        const nuevaTarea = {};
+
+        if(nombre) nuevaTarea.nombre = nombre; 
+        if(estado) nuevaTarea.estado = estado; 
+
+        //Guardar la tarea
+        tarea = await Tarea.findOneAndUpdate({ _id: req.params.id }, nuevaTarea, { new: true });
+
+        res.json({tarea});
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Hubo un error');
+    }
 }
